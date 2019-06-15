@@ -1,0 +1,27 @@
+# src/executors/circleci-infra-agent.yaml
+
+description: >
+  Alpine Linux-based circleci primary container, based on feedyard/circleci-base-agent. includes common tools for
+  building and testing docker images used for infrastructure-as-code pipelines.
+
+  https://quay.io/repository/feedyard/circleci-infra-agent
+  https://github.com/feedyard/circleci-infra-agent
+
+parameters:
+  resource-class:
+    type: enum
+    default: medium
+    enum: [small, medium, medium+, large, xlarge]
+
+  source-env:
+    description: name of file to source for environment variables
+    type: string
+    default: local.env
+
+resource_class: << parameters.resource-class >>
+
+docker:
+  - image: quay.io/feedyard/circleci-infra-agent:4.5.2
+
+environment:
+  BASH_ENV: << parameters.source-env >>

@@ -1,0 +1,20 @@
+# src/commands/lint.yaml
+
+description: validate terraform files
+
+parameters:
+
+  working-directory:
+    description: specify a specific folder in which to run the commands
+    type: string
+    default: '~/project'
+
+steps:
+  - run:
+      name: terraform cli validation
+      working_directory: << parameters.working-directory >>
+      command: terraform fmt -check=false
+  - run:
+      name: tflint
+      working_directory: << parameters.working-directory >>
+      command: docker run --rm -v $(pwd) -t wata727/tflint --error-with-issues

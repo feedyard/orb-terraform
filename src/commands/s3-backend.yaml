@@ -1,0 +1,34 @@
+# src/commands/s3-backend.yaml
+
+description: >
+  Create local backend.conf with s3 bucket information for use as terraform remote state store
+
+parameters:
+
+  bucket:
+    description: bucket name
+    type: string
+
+  key:
+    description: key - pathname - for state object name
+    type: string
+
+  region:
+    description: aws region
+    type: string
+
+  profile:
+    description: aws profile for s3 access
+    type: string
+    default: 'default'
+
+steps:
+  - run:
+      name: setup backend.conf
+      command: |
+        cat \<< EOF > backend.conf
+        key="<< parameters.key >>"
+        bucket="<< parameters.bucket >>"
+        region="<< parameters.region >>"
+        profile="<< parameters.profile >>"
+        EOF

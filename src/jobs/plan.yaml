@@ -1,0 +1,177 @@
+# /src/jobs/plan.yaml
+
+description: Run terraform plan for << parameters.env >>
+
+executor: circleci-infra-agent
+
+parameters:
+
+  aws-access-key-id:
+    description: aws access key id
+    type: env_var_name
+    default: AWS_ACCESS_KEY_ID
+
+  aws-secret-access-key:
+    description: aws secret access key
+    type: env_var_name
+    default: AWS_SECRET_ACCESS_KEY
+
+  aws-role:
+    description: assume aws role
+    type: string
+    default: ''
+
+  aws-region:
+    description: default aws region
+    type: string
+    default: ''
+
+  private-pem:
+    description: public key of the rsa used by a pipeline for managing encrypted information stored in a repo
+    type: env_var_name
+    default: PIPELINE_PRIVATE_PEM
+
+  stored-key:
+    description: >
+      filename of the file containing the key used to encrypt the encoded file. This key value was encrypted
+      using the public key of the rsa used by a pipeline for managing encrypted information stored in a repo.
+    type: string
+    default: key.bin
+
+  encoded-file:
+    description: filename of encoded file to be decrypted
+    type: string
+    default: ''
+
+  secrets-manager:
+    description: file containing list of secrets to pull from AWS Secrets Manager and set in ENV
+    type: string
+    default: ''
+
+  vault:
+    description: file containing list of secrets to pull from HashiCorp Vault and set in ENV
+    type: string
+    default: ''
+
+  terraform-cloud-token:
+    description: API token for app.terraform.io cloud state access
+    type: env_var_name
+    default: EMPTY
+
+  s3-bucket:
+    description: AWS s3 bucket for remote state files
+    type: string
+    default: ""
+
+  s3-key:
+    description: s3 key for backend state
+    type: string
+    default: ''
+
+  s3-region:
+    description: aws region for s3 state bucket
+    type: string
+    default: ''
+
+  s3-profile:
+    description: aws profile for s3 access
+    type: string
+    default: 'default'
+
+  env:
+    description: infrastructure environment name
+    type: string
+    default: ''
+
+  local-env:
+    description: file to source for local ENV
+    type: string
+    default: 'local.env'
+
+  working-directory:
+    description: specify a specific folder in which to run the commands
+    type: string
+    default: '~/project'
+
+  before-terraform:
+    description: Optional steps to run before running terraform plan.
+    type: steps
+    default: []
+
+  after-terraform:
+    description: Optional steps to run after running terraform plan.
+    type: steps
+    default: []
+
+steps:
+  - checkout
+
+  - when:
+      condition: << parameters.encoded-file >>
+      steps:
+        - common/decrypt-file:
+            private-pem: << parameters.private-pem >>
+            stored-key: << parameters.stored-key >>
+            encoded-file: << parameters.encoded-file >>
+        - run:
+            name: add encoded file to local BASH_ENV file
+            command: cat <<parameters.encoded-file>> >> << parameters.local-env >>
+
+  - when:
+      name: pull secrets from AWS Secrets Manager
+      condition: << parameters.secrets-manager >>
+      steps:
+        - common/secrets:
+            secrets: << parameters.secrets-manager >>
+            store: secrets-manager
+
+  - when:
+      name: pull secrets from HashiCorp Vault
+      condition: << parameters.vault >>
+      steps:
+        - common/secrets:
+            secrets: << parameters.secrets-manager >>
+            store: vault
+
+  - common/setup-aws-credentials:
+      aws-access-key-id: << parameters.aws-access-key-id >>
+      aws-secret-access-key: << parameters.aws-secret-access-key >>
+      aws-region: << parameters.aws-region >>
+      aws-role: << parameters.aws-role >>
+
+  - when:
+      name: Run before-terraform lifecycle hook steps
+      condition: << parameters.before-terraform >>
+      steps: << parameters.before-terraform >>
+
+  - when:
+      name: use app.terraform.io for remote_backend
+      condition: << parameters.terraform-cloud-token >>
+      steps:
+        - terraform-cloud:
+            cloud-token: << parameters.terraform-cloud-token >>
+
+  - when:
+      name: use s3 bucket for remote_backend
+      condition: << parameters.s3-bucket >>
+      steps:
+        - s3-backend:
+            bucket: << parameters.s3-bucket >>
+            key: << parameters.s3-key >>
+            region: << parameters.s3-region >>
+            profile: << parameters.s3-profile >>
+
+  - run:
+      name: terraform init
+      working_directory: << parameters.working-directory >>
+      command: terraform init <<#parameters.s3-bucket>> -backend-config $CIRCLE_WORKING_DIRECTORY/backend.conf <</parameters.s3-bucket>>
+
+  - run:
+      name: terraform plan
+      working_directory: << parameters.working-directory >>
+      command: terraform plan -var-file="<< parameters.env >>.json"
+
+  - when:
+      name: Run after-terraform lifecycle hook steps
+      condition: << parameters.after-terraform >>
+      steps: << parameters.after-terraform >>
