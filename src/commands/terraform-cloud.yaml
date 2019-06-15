@@ -1,7 +1,7 @@
 # src/commands/terraform-cloud.yaml
 
 description: >
-  Set access token for app.terraform.io API to use as backend state store
+  Set access token for app.terraform.io API to use as backend state store -
 
 parameters:
 

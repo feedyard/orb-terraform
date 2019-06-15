@@ -1,7 +1,7 @@
 # src/commands/s3-backend.yaml
 
 description: >
-  Create local backend.conf with s3 bucket information for use as terraform remote state store
+  Create local backend.conf with s3 bucket information for use as terraform remote state store -
 
 parameters:
 

@@ -1,6 +1,6 @@
 # src/commands/lint.yaml
 
-description: validate terraform files
+description: validate terraform files -
 
 parameters:
 
