@@ -2,7 +2,7 @@
 version: 2.1
 
 description: |
-  Feedyard/terraform is an example set of commands and jobs for managing terraform infrastructure pipelines
+  Feedyard/terraform is an example set of commands and jobs for managing terraform infrastructure pipelines.
 
 orbs:
   common: feedyard/common-pipeline-tasks@dev:latest
