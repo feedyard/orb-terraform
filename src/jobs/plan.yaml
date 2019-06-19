@@ -1,6 +1,6 @@
 # /src/jobs/plan.yaml
 
-description: Run terraform plan for << parameters.env >>
+description: Run terraform plan for << parameters.env >> -
 
 executor: circleci-infra-agent
 
