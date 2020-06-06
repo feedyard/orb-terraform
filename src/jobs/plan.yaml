@@ -52,19 +52,23 @@ steps:
       condition: << parameters.before-terraform >>
       steps: << parameters.before-terraform >>
   - run:
-      name: terraform init
+      name: terraform 
+      env:
+        TF_WORKSPACE: << parameters.workspace >>
       working_directory: << parameters.working-directory >>
       command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
-  - when:
-      name: terraform workspace select
-      condition: << parameters.workspace >>
-      steps:
-        - run:
-            working_directory: << parameters.working-directory >>
-            command: terraform workspace select << parameters.workspace >>
+  # - when:
+  #     name: terraform workspace select
+  #     condition: << parameters.workspace >>
+  #     steps:
+  #       - run:
+  #           working_directory: << parameters.working-directory >>
+  #           command: terraform workspace select << parameters.workspace >>
   - run:
       name: terraform plan
       working_directory: << parameters.working-directory >>
+      env:
+        TF_WORKSPACE: << parameters.workspace >>
       command: terraform plan <<#parameters.var-file>> -var-file=<< parameters.var-file >> <</parameters.var-file>>
   - when:
       name: Run after-terraform lifecycle hook steps
