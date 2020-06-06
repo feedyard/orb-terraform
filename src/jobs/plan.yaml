@@ -56,7 +56,9 @@ steps:
   - run:
       name: terraform 
       working_directory: << parameters.working-directory >>
-      command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
+      command: |
+        echo $TF_WORKSPACE
+        terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
   # - when:
   #     name: terraform workspace select
   #     condition: << parameters.workspace >>
