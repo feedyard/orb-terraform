@@ -25,7 +25,7 @@ parameters:
   working-directory:
     description: specify a specific folder in which to run the commands
     type: string
-    default: "~/project"
+    default: "."
 
   backend-conf:
     description: additional terraform init parameters to configure backend.conf is necessary
