@@ -54,10 +54,13 @@ steps:
       name: terraform init
       working_directory: << parameters.working-directory >>
       command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
-  - run:
+  - when:
       name: terraform workspace select
-      working_directory: << parameters.working-directory >>
-      command: terraform workspace select << parameters.workspace >>
+      condition: << parameters.workspace >>
+      steps:
+        - run:
+            working_directory: << parameters.working-directory >>
+            command: terraform workspace select << parameters.workspace >>
   - run:
       name: terraform plan
       working_directory: << parameters.working-directory >>

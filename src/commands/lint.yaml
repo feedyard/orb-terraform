@@ -17,4 +17,4 @@ steps:
   - run:
       name: tflint
       working_directory: << parameters.working-directory >>
-      command: docker run --rm -v $(pwd) -t wata727/tflint --error-with-issues
+      command: docker run --rm -v $(pwd) -t wata727/tflint
