@@ -5,7 +5,7 @@ description: >
 
 parameters:
 
-  cloud-token:
+  terraform-cloud-token:
     description: API token for app.terraform.io cloud state access
     type: string
 
@@ -15,6 +15,6 @@ steps:
       command: |
         cat \<< EOF > ~/.terraformrc
         credentials "app.terraform.io" {
-          token = "<< parameters.cloud-token >>"
+          token = "<< parameters.terraform-cloud-token >>"
         }
         EOF

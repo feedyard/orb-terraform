@@ -5,4 +5,4 @@ description: |
   Feedyard/terraform is an example set of commands and jobs for managing terraform infrastructure pipelines.
 
 orbs:
-  common: feedyard/common-pipeline-tasks@0.6.0
+  secrets: feedyard/secrets@dev:latest

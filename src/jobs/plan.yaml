@@ -1,8 +1,8 @@
 # /src/jobs/plan.yaml
 
-description: Run terraform plan for << parameters.env >>
+description: Run terraform plan using configurable backend and workspace
 
-executor: circleci-infra-agent
+executor: di-circleci-infra-image
 
 parameters:
 
@@ -11,43 +11,38 @@ parameters:
     type: string
     default: /bin/sh -eo pipefail
 
-  secrets-manager:
-    description: file containing list of secrets to pull from AWS Secrets Manager and set in ENV
-    type: string
-    default: ''
-
-  vault:
-    description: file containing list of secrets to pull from HashiCorp Vault and set in ENV
-    type: string
-    default: ''
-
   terraform-cloud-token:
     description: API token for app.terraform.io cloud state access
     type: env_var_name
-    default: EMPTY
+    default: TERRAFORM_CLOUD_TOKEN
 
-  s3-bucket:
-    description: AWS s3 bucket for remote state files
-    type: string
-    default: ""
+  # s3-bucket:
+  #   description: AWS s3 bucket for remote state files
+  #   type: string
+  #   default: ""
 
-  s3-key:
-    description: s3 key for backend state
+  # s3-key:
+  #   description: s3 key for backend state
+  #   type: string
+  #   default: ''
+
+  # s3-region:
+  #   description: aws region for s3 state bucket
+  #   type: string
+  #   default: ''
+
+  # s3-profile:
+  #   description: aws profile for s3 access
+  #   type: string
+  #   default: 'default'
+
+  workspace:
+    description: terraform workspace (infrastructure environment) name
     type: string
     default: ''
 
-  s3-region:
-    description: aws region for s3 state bucket
-    type: string
-    default: ''
-
-  s3-profile:
-    description: aws profile for s3 access
-    type: string
-    default: 'default'
-
-  env:
-    description: infrastructure environment name
+  var-file:
+    description: terraform variable file to include in plan, apply, output, and destroy commands
     type: string
     default: ''
 
@@ -69,22 +64,8 @@ parameters:
 steps:
   - checkout
   - setup_remote_docker
-  - when:
-      name: pull secrets from AWS Secrets Manager
-      condition: << parameters.secrets-manager >>
-      steps:
-        - common/secrets:
-            secrets: << parameters.secrets-manager >>
-            store: secrets-manager
-
-  - when:
-      name: pull secrets from HashiCorp Vault
-      condition: << parameters.vault >>
-      steps:
-        - common/secrets:
-            secrets: << parameters.secrets-manager >>
-            store: vault
-
+  - lint:
+      working-directory: << parameters.working-directory >>
   - when:
       name: Run before-terraform lifecycle hook steps
       condition: << parameters.before-terraform >>
@@ -95,27 +76,31 @@ steps:
       condition: << parameters.terraform-cloud-token >>
       steps:
         - terraform-cloud:
-            cloud-token: << parameters.terraform-cloud-token >>
+            terraform-cloud-token: << parameters.terraform-cloud-token >>
 
-  - when:
-      name: use s3 bucket for remote_backend
-      condition: << parameters.s3-bucket >>
-      steps:
-        - s3-backend:
-            bucket: << parameters.s3-bucket >>
-            key: << parameters.s3-key >>
-            region: << parameters.s3-region >>
-            profile: << parameters.s3-profile >>
+  # - when:
+  #     name: use s3 bucket for remote_backend
+  #     condition: << parameters.s3-bucket >>
+  #     steps:
+  #       - s3-backend:
+  #           bucket: << parameters.s3-bucket >>
+  #           key: << parameters.s3-key >>
+  #           region: << parameters.s3-region >>
+  #           profile: << parameters.s3-profile >>
 
   - run:
       name: terraform init
       working_directory: << parameters.working-directory >>
-      command: terraform init <<#parameters.s3-bucket>> -backend-config $CIRCLE_WORKING_DIRECTORY/backend.conf <</parameters.s3-bucket>>
-
+      command: terraform init
+      # terraform init <<#parameters.s3-bucket>> -backend-config $CIRCLE_WORKING_DIRECTORY/backend.conf <</parameters.s3-bucket>>
+  - run:
+      name: terraform workspace select
+      working_directory: << parameters.working-directory >>
+      command: terraform workspace select << parameters.workspace >>
   - run:
       name: terraform plan
       working_directory: << parameters.working-directory >>
-      command: terraform plan -var-file="<< parameters.env >>.json"
+      command: terraform plan <<#parameters.var-file>> -var-file=<< parameters.var-file >> <</parameters.var-file>>
 
   - when:
       name: Run after-terraform lifecycle hook steps
