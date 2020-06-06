@@ -4,6 +4,8 @@ description: Run terraform plan using configurable backend and workspace
 
 executor: di-circleci-infra-image
 shell: << parameters.shell >>
+env:
+  TF_WORKSPACE: << parameters.workspace >>
 
 parameters:
 
@@ -53,8 +55,6 @@ steps:
       steps: << parameters.before-terraform >>
   - run:
       name: terraform 
-      env:
-        TF_WORKSPACE: << parameters.workspace >>
       working_directory: << parameters.working-directory >>
       command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
   # - when:
@@ -67,8 +67,6 @@ steps:
   - run:
       name: terraform plan
       working_directory: << parameters.working-directory >>
-      env:
-        TF_WORKSPACE: << parameters.workspace >>
       command: terraform plan <<#parameters.var-file>> -var-file=<< parameters.var-file >> <</parameters.var-file>>
   - when:
       name: Run after-terraform lifecycle hook steps
