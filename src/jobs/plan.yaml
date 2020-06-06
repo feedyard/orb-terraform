@@ -3,6 +3,7 @@
 description: Run terraform plan using configurable backend and workspace
 
 executor: di-circleci-infra-image
+shell: << parameters.shell >>
 
 parameters:
 
