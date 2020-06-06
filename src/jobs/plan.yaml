@@ -11,45 +11,25 @@ parameters:
     type: string
     default: /bin/sh -eo pipefail
 
-  terraform-cloud-token:
-    description: API token for app.terraform.io cloud state access
-    type: env_var_name
-    default: TERRAFORM_CLOUD_TOKEN
-
-  # s3-bucket:
-  #   description: AWS s3 bucket for remote state files
-  #   type: string
-  #   default: ""
-
-  # s3-key:
-  #   description: s3 key for backend state
-  #   type: string
-  #   default: ''
-
-  # s3-region:
-  #   description: aws region for s3 state bucket
-  #   type: string
-  #   default: ''
-
-  # s3-profile:
-  #   description: aws profile for s3 access
-  #   type: string
-  #   default: 'default'
-
   workspace:
     description: terraform workspace (infrastructure environment) name
     type: string
-    default: ''
+    default: ""
 
   var-file:
     description: terraform variable file to include in plan, apply, output, and destroy commands
     type: string
-    default: ''
+    default: ""
 
   working-directory:
     description: specify a specific folder in which to run the commands
     type: string
-    default: '~/project'
+    default: "~/project"
+
+  backend-conf:
+    description: additional terraform init parameters to configure backend.conf is necessary
+    type: string
+    default: ""
 
   before-terraform:
     description: Optional steps to run before running terraform plan.
@@ -70,29 +50,10 @@ steps:
       name: Run before-terraform lifecycle hook steps
       condition: << parameters.before-terraform >>
       steps: << parameters.before-terraform >>
-
-  - when:
-      name: use app.terraform.io for remote_backend
-      condition: << parameters.terraform-cloud-token >>
-      steps:
-        - terraform-cloud:
-            terraform-cloud-token: << parameters.terraform-cloud-token >>
-
-  # - when:
-  #     name: use s3 bucket for remote_backend
-  #     condition: << parameters.s3-bucket >>
-  #     steps:
-  #       - s3-backend:
-  #           bucket: << parameters.s3-bucket >>
-  #           key: << parameters.s3-key >>
-  #           region: << parameters.s3-region >>
-  #           profile: << parameters.s3-profile >>
-
   - run:
       name: terraform init
       working_directory: << parameters.working-directory >>
-      command: terraform init
-      # terraform init <<#parameters.s3-bucket>> -backend-config $CIRCLE_WORKING_DIRECTORY/backend.conf <</parameters.s3-bucket>>
+      command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
   - run:
       name: terraform workspace select
       working_directory: << parameters.working-directory >>
@@ -101,7 +62,6 @@ steps:
       name: terraform plan
       working_directory: << parameters.working-directory >>
       command: terraform plan <<#parameters.var-file>> -var-file=<< parameters.var-file >> <</parameters.var-file>>
-
   - when:
       name: Run after-terraform lifecycle hook steps
       condition: << parameters.after-terraform >>
