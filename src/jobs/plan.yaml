@@ -56,17 +56,7 @@ steps:
   - run:
       name: terraform 
       working_directory: << parameters.working-directory >>
-      command: |
-        echo "TF_WORKSPACE env var = ${TF_WORKSPACE}"
-        echo "orb parameter = << parameters.workspace >>"
-        terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
-  # - when:
-  #     name: terraform workspace select
-  #     condition: << parameters.workspace >>
-  #     steps:
-  #       - run:
-  #           working_directory: << parameters.working-directory >>
-  #           command: terraform workspace select << parameters.workspace >>
+      command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
   - run:
       name: terraform plan
       working_directory: << parameters.working-directory >>
