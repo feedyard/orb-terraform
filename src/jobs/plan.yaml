@@ -54,7 +54,7 @@ steps:
       condition: << parameters.before-terraform >>
       steps: << parameters.before-terraform >>
   - run:
-      name: terraform 
+      name: terraform init
       working_directory: << parameters.working-directory >>
       command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
   - run:

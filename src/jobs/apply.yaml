@@ -47,18 +47,16 @@ parameters:
 steps:
   - checkout
   - setup_remote_docker
-  - lint:
-      working-directory: << parameters.working-directory >>
   - when:
       name: Run before-terraform lifecycle hook steps
       condition: << parameters.before-terraform >>
       steps: << parameters.before-terraform >>
   - run:
-      name: terraform 
+      name: terraform init
       working_directory: << parameters.working-directory >>
       command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
   - run:
-      name: terraform plan
+      name: terraform apply
       working_directory: << parameters.working-directory >>
       command: terraform apply <<#parameters.var-file>> -var-file=<< parameters.var-file >> <</parameters.var-file>> --auto-approve
   - when:
