@@ -1,0 +1,52 @@
+description: basic example
+
+usage:
+  version: 2.1
+
+  orbs:
+    orb-tools: feedyard/orb-terraform@2.2.0
+
+  on-push-master: &on-push-master
+    branches:
+      only: /master/
+    tags:
+      ignore: /.*/
+
+  workflows:
+    version: 2
+
+    dev-release:
+      jobs:
+        - terraform/plan:
+          name: sandbox-change-plan
+          context: myContext
+          shell: secrethub run -- /bin/sh -eo pipefail
+          workspace: sandbox
+          before-terraform:
+            - run:
+                name: template environmental configuration and credentials
+                command: |
+                  secrethub inject -i tpl/terraformrc.tpl -o ~/.terraformrc
+                  secrethub inject -i tpl/sandbox.auto.tfvars.json.tpl -o sandbox.auto.tfvars.json
+          filters: *on-push-master
+
+      - approve-sandbox-changes:
+          type: approval
+          requires:
+            - sandbox-change-plan
+          filters: *on-push-master
+
+      - terraform/apply:
+          name: sandbox-change-apply
+          context: myContext
+          shell: secrethub run -- /bin/sh -eo pipefail
+          workspace: sandbox
+          before-terraform:
+            - run:
+                name: setup credentials from secrets
+                command: |
+                  secrethub inject -i tpl/terraformrc.tpl -o ~/.terraformrc
+                  secrethub inject -i tpl/sandbox.auto.tfvars.json.tpl -o sandbox.auto.tfvars.json
+          requires:
+            - approve-sandbox-changes
+          filters: *on-push-master
