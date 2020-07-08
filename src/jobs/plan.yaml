@@ -1,6 +1,6 @@
 # /src/jobs/plan.yaml
 
-description: Run terraform plan using configurable backend and workspace
+description: Run terraform plan using configurable backend and optional workspace
 
 executor: di-circleci-infra-image
 environment:

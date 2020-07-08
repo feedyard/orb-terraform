@@ -1,6 +1,6 @@
 # /src/jobs/apply.yaml
 
-description: Run terraform apply using configurable backend and workspace
+description: Run terraform apply using configurable backend and optional workspace
 
 executor: di-circleci-infra-image
 environment:
