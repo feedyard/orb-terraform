@@ -3,8 +3,6 @@
 description: Run terraform apply using configurable backend and optional workspace
 
 executor: di-circleci-infra-image
-environment:
-  TF_WORKSPACE: << parameters.workspace >>
 shell: << parameters.shell >>
 
 parameters:
@@ -55,6 +53,12 @@ steps:
       name: terraform init
       working_directory: << parameters.working-directory >>
       command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
+  - when:
+      name: Use terraform workspaces
+      condition: << parameters.workspace >>
+      steps: 
+        - run:
+            command: terraform workspace select << parameters.workspace >>
   - run:
       name: terraform apply
       working_directory: << parameters.working-directory >>
