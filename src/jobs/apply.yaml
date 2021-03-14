@@ -39,6 +39,11 @@ parameters:
     type: steps
     default: []
 
+  after-terraform-init:
+    description: Optional steps to run after terraform init but before running terraform plan
+    type: steps
+    default: []
+
   after-terraform:
     description: Optional steps to run after running terraform plan.
     type: steps
@@ -50,11 +55,17 @@ steps:
   - when:
       name: Run before-terraform lifecycle hook steps
       condition: << parameters.before-terraform >>
+      working_directory: << parameters.working-directory >>
       steps: << parameters.before-terraform >>
   - run:
       name: terraform init
       working_directory: << parameters.working-directory >>
       command: terraform init <<#parameters.backend-conf>> << parameters.backend-conf >> <</parameters.backend-conf>>
+  - when:
+      name: Run after-terraform-init lifecycle hook steps
+      condition: << parameters.after-terraform-init >>
+      working_directory: << parameters.working-directory >>
+      steps: << parameters.after-terraform-init >>
   - run:
       name: terraform apply
       working_directory: << parameters.working-directory >>
@@ -62,4 +73,5 @@ steps:
   - when:
       name: Run after-terraform lifecycle hook steps
       condition: << parameters.after-terraform >>
+      working_directory: << parameters.working-directory >>
       steps: << parameters.after-terraform >>
