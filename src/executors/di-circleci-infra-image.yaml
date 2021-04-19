@@ -10,7 +10,6 @@ description: >
 parameters:
   tag:
     type: string
-    default: stable
   resource-class:
     type: enum
     default: medium
