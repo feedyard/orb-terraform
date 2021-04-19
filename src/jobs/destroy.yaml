@@ -2,7 +2,9 @@
 
 description: Run terraform destroy using configurable backend and optional workspace
 
-executor: di-circleci-infra-image
+executor:
+  name: di-circleci-infra-image
+  tag: << parameters.tag >>
 environment:
   TF_WORKSPACE: << parameters.workspace >>
 shell: << parameters.shell >>
@@ -18,6 +20,11 @@ parameters:
     description: terraform workspace (infrastructure environment) name
     type: string
     default: ""
+
+  tag:
+    description: infra image tag of the executor
+    type: string
+    default: stable
 
   var-file:
     description: terraform variable file to include in plan, apply, output, and destroy commands
