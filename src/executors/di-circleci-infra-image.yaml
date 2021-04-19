@@ -8,6 +8,9 @@ description: >
   https://github.com/ThoughtWorks-DPS/di-circleci-infra-image
 
 parameters:
+  tag:
+    type: string
+    default: stable
   resource-class:
     type: enum
     default: medium
@@ -16,4 +19,4 @@ parameters:
 resource_class: << parameters.resource-class >>
 
 docker:
-  - image: twdps/di-circleci-infra-image:stable
+  - image: 'twdps/di-circleci-infra-image:<< parameters.tag >>'
