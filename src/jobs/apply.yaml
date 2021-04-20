@@ -2,12 +2,26 @@
 
 description: Run terraform apply using configurable backend and optional workspace
 
-executor: di-circleci-infra-image
+executor:
+  name: di-circleci-infra-image
+  tag: << parameters.tag >>
+  resource-class: << parameters.resource-class >>
+
 environment:
   TF_WORKSPACE: << parameters.workspace >>
 shell: << parameters.shell >>
 
 parameters:
+
+  resource-class:
+    type: enum
+    default: medium
+    enum: [small, medium, medium+, large, xlarge]
+
+  tag:
+    description: select from twdps/di-circleci-infra-image versions. Default = stable
+    type: string
+    default: "stable"
 
   shell:
     description: default shell invocation. Override to support different shells or tools like secrethub.io
