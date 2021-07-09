@@ -16,12 +16,12 @@ parameters:
   resource-class:
     type: enum
     default: medium
-    enum: [small, medium, medium+, large, xlarge]
+    enum: [small, medium, medium+, large, xlarge, 2xlarge, 2xlarge+]
 
   tag:
     description: select from twdps/di-circleci-infra-image versions. Default = stable
     type: string
-    default: "stable"
+    default: alpine-stable
 
   shell:
     description: default shell invocation. Override to support different shells or tools like secrethub.io

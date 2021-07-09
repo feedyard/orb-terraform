@@ -1,7 +1,7 @@
 # src/executors/di-circleci-infra-agent.yaml
 
 description: >
-  Alpine Linux based ThoughtWorks DPS Convenience Image twdps/di-circleci-infra-image.
+  ThoughtWorks DPS Convenience Image twdps/di-circleci-infra-image.
   Includes common tools for infrastructure-as-code pipelines.
 
   https://hub.docker.com/repository/docker/twdps/di-circleci-infra-image
@@ -11,12 +11,10 @@ parameters:
   tag:
     description: select from twdps/di-circleci-infra-image versions. Default = stable
     type: string
-    default: "stable"
 
   resource-class:
     type: enum
-    default: medium
-    enum: [small, medium, medium+, large, xlarge]
+    enum: [small, medium, medium+, large, xlarge, 2xlarge, 2xlarge+]
 
 resource_class: << parameters.resource-class >>
 
